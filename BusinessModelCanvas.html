@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>OPRO | Business Model Canvas</title>
+	<link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+	<link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet">
+	<script src="js/react.min.js"></script>
+	<script src="js/react-dom.min.js"></script>
+	<script src="js/browser.min.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.3.0/firebase.js"></script>
+	<style>
+		* {margin: 0; padding: 0; font-size: 100%; border: none; outline: none; font-size: 13px; box-sizing: border-box; font-family: 'PT Sans Narrow', sans-serif;}
+		body {background-color: #f5f5f5;height:100vh;}
+		a {text-decoration: none; color: #000;}
+		ul {list-style: none;}
+		img {max-width: 100%;}
+		
+		.container {height: 100%; width:100%; display:grid; 
+			grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+			grid-template-rows:1fr 1fr 1fr;
+			grid-template-areas: 
+				"partners activities value cust-relation cust-segments"
+				"partners resources value channels cust-segments"
+				"cost cost value revenue revenue";
+		}
+		
+		.generic-box { 
+			border: 1px solid #999; 
+			padding:5px; 
+			margin: 1%; 
+			display: flex;
+			flex-direction: column;
+			position: relative;
+		}
+		
+		.generic-box i { margin-left: 10px; }
+		
+		.box-container {
+			position: absolute;
+			top:30px;
+			left: 0;
+			right:0;
+			bottom:5px;
+		}
+		
+		.container .partners {grid-area: partners; }
+		.container .activities {grid-area: activities; }
+		.container .value {grid-area: value; }
+		.container .cust-relation {grid-area: cust-relation; }
+		.container .cust-segments {grid-area: cust-segments; }
+		.container .resources {grid-area: resources;}
+		.container .channels {grid-area: channels; }
+		.container .cost {grid-area: cost; }
+		.container .revenue {grid-area: revenue; }
+		
+		.box-content { 
+			height:100%; 
+			width: 100%; 
+			position: relative; 
+			overflow-x: hidden; 
+			overflow-y:auto; 
+		}
+		
+		.box-content ul {  }
+		.box-content ul li { 
+			background-color: #f1f1f1; 
+			padding: 5px; 
+			margin: 5px;
+			border: 1px #999 solid;
+			display: block;
+		}
+
+		.box-content ul li button i { margin:0; }
+
+		.box-content ul li button { 
+			width: 100%;
+			background: transparent;
+			cursor: pointer;
+		}
+		
+		.box-content ul li .smallButtons {
+			width: max-content;
+			margin: 5px;
+			padding: 5px;
+			cursor: pointer;
+		}
+		
+		.box-content ul li textarea { 
+			width: 100%;
+			height: 10%;
+			resize: none;
+			padding: 2px;
+		}
+		
+		
+	</style>   
+</head>
+
+<body>
+	<div class="container">
+		<div class="generic-box partners"><a href="#">Key partners<i class="fa fa-lg fa-handshake-o" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="partners"></div></div></div>
+		<div class="generic-box activities"><a href="#">Key activities<i class="fa fa-lg fa-tasks" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="activities"></div></div></div>
+		<div class="generic-box value"><a href="#">Value proposition<i class="fa fa-lg fa-gift" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="value"></div></div></div>
+		<div class="generic-box cust-relation"><a href="#">Customer relationship<i class="fa fa-lg fa-thumbs-up" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="cust-relation"></div></div></div>
+		<div class="generic-box cust-segments"><a href="#">Customer segments<i class="fa fa-lg fa-bar-chart" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="cust-segments"></div></div></div>
+		<div class="generic-box resources"><a href="#">Key resources<i class="fa fa-lg fa-arrows-alt" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="resources"></div></div></div>
+		<div class="generic-box channels"><a href="#">Channels<i class="fa fa-lg fa-exchange" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="channels"></div></div></div>
+		<div class="generic-box cost"><a href="#">Cost structure<i class="fa fa-lg fa-pie-chart" aria-hidden="true"></i></a><div class="box-container"><div class="box-content" id="cost"></div></div></div>
+		<div class="generic-box revenue"><a href="#">Revenue stream<i class="fa fa-lg fa-line-chart" aria-hidden="true"></i><div class="box-container"></a><div class="box-content" id="revenue"></div></div></div>
+	</div>
+	
+	<script type="text/babel">
+	// Initialize Firebase
+	var config = {
+		apiKey: "AIzaSyBUYgOccMv7pK3XxlpBTRjchQWLyg7rcug",
+		authDomain: "opro-business-model-canvas.firebaseapp.com",
+		databaseURL: "https://opro-business-model-canvas.firebaseio.com",
+		projectId: "opro-business-model-canvas",
+		storageBucket: "",
+		messagingSenderId: "158818858668"
+	};
+	firebase.initializeApp(config);
+	
+	class BusinessModelArea extends React.Component {
+		constructor(props, context){
+			super(props);
+			
+			this.state = {areaItems: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]};
+		}
+		componentWillMount(){
+			this.businessModelDB = firebase.database().ref();
+		}
+		componentDidMount(){
+
+			this.businessModelDB.on('child_added', (snap) => {
+				// Do something
+			});
+			
+			this.businessModelDB.on('child_removed', (snap) => {
+				// Do something
+			});
+			
+			this.businessModelDB.on('child_changed', (snap) => {
+				// Do something
+			});
+				
+		}
+		onClickAdd(txt) {
+			console.log("Clicou em add" + txt.value);
+		}
+		render(){return (
+			<ul>
+			<li>
+				<div id={"divAreaBtn_" + this.props.area}><button><i className="fa fa-plus"></i></button></div>
+				<div id={"divAreaAdd_" + this.props.area}><form id={"formAddItem_" + this.props.area} onSubmit={this.onClickAdd}>
+					<textarea id={"txtAddItem_" + this.props.area} placeholder="Item description..."></textarea>
+					<button className="smallButtons" type="submit" form={"formAddItem_" + this.props.area}><i className="fa fa-check-square"></i></button>
+					<button className="smallButtons"><i className="fa fa-times"></i></button>
+				</form></div>
+			</li>
+			{
+			this.state.areaItems.map(item => {
+				return <li>
+				<label><BusinessModelItem area={this.props.area} /></label>
+				</li>
+			})}
+			</ul>
+			
+		);}
+	}
+	
+	class BusinessModelItem extends React.Component {
+		constructor(props, context) {super(props);}
+		render() {return (
+			<section>{this.props.area}</section>
+		);}
+	}
+	
+	ReactDOM.render(<BusinessModelArea area="partners" />, document.getElementById('partners'));	
+	ReactDOM.render(<BusinessModelArea area="activities" />, document.getElementById('activities'));	
+	ReactDOM.render(<BusinessModelArea area="value" />, document.getElementById('value'));	
+	ReactDOM.render(<BusinessModelArea area="cust-relation" />, document.getElementById('cust-relation'));	
+	ReactDOM.render(<BusinessModelArea area="cust-segments" />, document.getElementById('cust-segments'));	
+	ReactDOM.render(<BusinessModelArea area="resources" />, document.getElementById('resources'));	
+	ReactDOM.render(<BusinessModelArea area="channels" />, document.getElementById('channels'));	
+	ReactDOM.render(<BusinessModelArea area="cost" />, document.getElementById('cost'));	
+	ReactDOM.render(<BusinessModelArea area="revenue" />, document.getElementById('revenue'));	
+		
+	</script>
+</body>
+</html>
