@@ -131,7 +131,8 @@
 		}
 		componentWillMount(){
 			this.businessModelDB = firebase.database().ref();
-		}
+		}
+
 		componentDidMount(){
 
 			this.businessModelDB.on('child_added', (snap) => {
@@ -190,4 +191,4 @@
 		
 	</script>
 </body>
-</html>
+</html>
